@@ -1,0 +1,33 @@
+{
+  "name": "virt-ui-overlay",
+  "version": "0.0.1",
+  "description": "virt material ui overlay",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bakasho-libs/virt-ui-overlay.git"
+  },
+  "scripts": {
+    "example": "comn -f ./example/src/index.js -o ./example/index.js"
+  },
+  "main": "src/index.js",
+  "author": "Bakasho Team",
+  "license": "MIT",
+  "keywords": [
+    "virt-ui-overlay",
+    "virt-ui-overlay.js"
+  ],
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "comn": "git://github.com/nathanfaucett/comn.git",
+    "virt-dom": "git://github.com/nathanfaucett/virt-dom.git",
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-jsbeautifier": "^0.2.10"
+  },
+  "dependencies": {
+    "css": "git://github.com/nathanfaucett/css.git",
+    "extend": "git://github.com/nathanfaucett/extend.git",
+    "prop_types": "git://github.com/nathanfaucett/prop_types.git",
+    "virt": "git://github.com/nathanfaucett/virt.git"
+  }
+}
