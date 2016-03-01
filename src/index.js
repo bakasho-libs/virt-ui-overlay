@@ -126,15 +126,14 @@ OverlayPrototype.getStyles = function() {
 
 OverlayPrototype.render = function() {
     var props = this.props,
-        style = props.style,
         styles = this.getStyles();
 
     return (
         virt.createView("div", extend(props, {
             className: "virt-ui-Overlay" + (props.className ? " " + props.className : ""),
             ref: "overlay",
-            show: show,
-            style: extend(styles.root, style)
+            show: props.show,
+            style: extend(styles.root, props.style)
         }))
     );
 };
