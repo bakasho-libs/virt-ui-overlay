@@ -22,22 +22,14 @@ Overlay.propTypes = {
     autoLockScrolling: propTypes.bool,
     show: propTypes.bool.isRequired,
     style: propTypes.object,
+    opacity: propTypes.number,
     transitionEnabled: propTypes.bool
-};
-
-Overlay.contextTypes = {
-    muiTheme: propTypes.implement({
-        styles: propTypes.implement({
-            overlay: propTypes.implement({
-                backgroundColor: propTypes.string
-            }).isRequired
-        }).isRequired
-    }).isRequired
 };
 
 Overlay.defaultProps = {
     autoLockScrolling: true,
     transitionEnabled: true,
+    opacity: 0.38,
     style: {}
 };
 
@@ -82,13 +74,8 @@ OverlayPrototype.__allowScrolling = function() {
     body.style.overflow = this.__originalBodyOverflow || "";
 };
 
-OverlayPrototype.getTheme = function() {
-    return this.context.muiTheme.styles.overlay;
-};
-
 OverlayPrototype.getStyles = function() {
     var props = this.props,
-        theme = this.getTheme(),
         styles = {
             root: {
                 position: 'fixed',
@@ -96,13 +83,13 @@ OverlayPrototype.getStyles = function() {
                 width: '100%',
                 top: 0,
                 left: '-100%',
-                backgroundColor: theme.backgroundColor,
+                backgroundColor: props.color || "#000",
                 WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)',
                 willChange: 'opacity'
             }
         };
 
-    css.opacity(styles.root, "0");
+    css.opacity(styles.root, 0);
     css.transform(styles.root, "translateZ(0)");
 
     if (props.transitionEnabled) {
@@ -113,7 +100,7 @@ OverlayPrototype.getStyles = function() {
     }
 
     if (props.show) {
-        css.opacity(styles.root, "1");
+        css.opacity(styles.root, props.opacity);
         styles.root.left = "0px";
         css.transition(styles.root,
             "left 0ms cubic-bezier(0.23, 1, 0.32, 1) 0ms",

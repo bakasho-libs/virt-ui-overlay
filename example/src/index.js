@@ -60,10 +60,8 @@ AppPrototype.getChildContext = function() {
     return {
         size: this.state.size,
         muiTheme: {
-            styles: {
-                overlay: {
-                    backgroundColor: "#fff"
-                }
+            palette: {
+                backgroundColor: "#000"
             }
         }
     };

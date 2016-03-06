@@ -121,10 +121,8 @@ AppPrototype.getChildContext = function() {
     return {
         size: this.state.size,
         muiTheme: {
-            styles: {
-                overlay: {
-                    backgroundColor: "#fff"
-                }
+            palette: {
+                backgroundColor: "#000"
             }
         }
     };
@@ -319,6 +317,38 @@ propTypes.oneOf = function createOneOfCheck(expectedValues) {
     });
 };
 
+propTypes.arrayOf = function createArrayOfCheck(checkType) {
+
+    if (!isFunction(checkType)) {
+        throw new TypeError(
+            "Invalid Function Interface for arrayOf, checkType must be a function" +
+            "Function(props: Object, propName: String, callerName: String, locale) return Error or null."
+        );
+    }
+
+    return createTypeChecker(function validateArrayOf(props, propName, callerName, locale) {
+        var error = propTypes.array(props, propName, callerName, locale),
+            propValue, i, il;
+
+        if (error) {
+            return error;
+        } else {
+            propValue = props[propName];
+            i = -1;
+            il = propValue.length - 1;
+
+            while (i++ < il) {
+                error = checkType(propValue, i, callerName + "[" + i + "]", locale);
+                if (error) {
+                    return error;
+                }
+            }
+
+            return null;
+        }
+    });
+};
+
 propTypes.implement = function createImplementCheck(expectedInterface) {
     var key;
 
@@ -427,22 +457,14 @@ Overlay.propTypes = {
     autoLockScrolling: propTypes.bool,
     show: propTypes.bool.isRequired,
     style: propTypes.object,
+    opacity: propTypes.number,
     transitionEnabled: propTypes.bool
-};
-
-Overlay.contextTypes = {
-    muiTheme: propTypes.implement({
-        styles: propTypes.implement({
-            overlay: propTypes.implement({
-                backgroundColor: propTypes.string
-            }).isRequired
-        }).isRequired
-    }).isRequired
 };
 
 Overlay.defaultProps = {
     autoLockScrolling: true,
     transitionEnabled: true,
+    opacity: 0.38,
     style: {}
 };
 
@@ -487,13 +509,8 @@ OverlayPrototype.__allowScrolling = function() {
     body.style.overflow = this.__originalBodyOverflow || "";
 };
 
-OverlayPrototype.getTheme = function() {
-    return this.context.muiTheme.styles.overlay;
-};
-
 OverlayPrototype.getStyles = function() {
     var props = this.props,
-        theme = this.getTheme(),
         styles = {
             root: {
                 position: 'fixed',
@@ -501,13 +518,13 @@ OverlayPrototype.getStyles = function() {
                 width: '100%',
                 top: 0,
                 left: '-100%',
-                backgroundColor: theme.backgroundColor,
+                backgroundColor: props.color || "#000",
                 WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)',
                 willChange: 'opacity'
             }
         };
 
-    css.opacity(styles.root, "0");
+    css.opacity(styles.root, 0);
     css.transform(styles.root, "translateZ(0)");
 
     if (props.transitionEnabled) {
@@ -518,7 +535,7 @@ OverlayPrototype.getStyles = function() {
     }
 
     if (props.show) {
-        css.opacity(styles.root, "1");
+        css.opacity(styles.root, props.opacity);
         styles.root.left = "0px";
         css.transition(styles.root,
             "left 0ms cubic-bezier(0.23, 1, 0.32, 1) 0ms",
@@ -9192,7 +9209,7 @@ function WebSocketAdapter(root, socket, attachMessage, sendMessage) {
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/i18n/src/index.js */
+/* ../../node_modules/prop_types/node_modules/i18n/src/index.js */
 
 var isArray = require(18),
     isString = require(19),
@@ -9346,7 +9363,7 @@ function create(flatMode, throwMissingError) {
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/is_regexp/src/index.js */
+/* ../../node_modules/prop_types/node_modules/is_regexp/src/index.js */
 
 var isObject = require(31);
 
@@ -9392,7 +9409,7 @@ module.exports = {
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/format/src/index.js */
+/* ../../node_modules/prop_types/node_modules/format/src/index.js */
 
 var isString = require(19),
     isObject = require(31),
@@ -9516,7 +9533,7 @@ format.inspect = format.o;
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/fast_slice/src/index.js */
+/* ../../node_modules/prop_types/node_modules/fast_slice/src/index.js */
 
 var clamp = require(183),
     isNumber = require(22);
@@ -9546,7 +9563,7 @@ function fastSlice(array, offset) {
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/clamp/src/index.js */
+/* ../../node_modules/prop_types/node_modules/clamp/src/index.js */
 
 module.exports = clamp;
 
@@ -9566,7 +9583,7 @@ function clamp(x, min, max) {
 function(require, exports, module, undefined, global) {
 /* ../../node_modules/css/src/index.js */
 
-var forEach = require(108),
+var arrayForEach = require(111),
     indexOf = require(55),
     fastSlice = require(182),
     prefix = require(185),
@@ -9579,7 +9596,7 @@ var forEach = require(108),
 var css = exports;
 
 
-forEach(properties, function(key) {
+arrayForEach(properties, function(key) {
     if (indexOf(nonPrefixProperties, key) === -1) {
         css[key] = function(styles, value) {
             return prefix(styles, key, value, null, css.stopPrefix);
@@ -9605,12 +9622,13 @@ css.stopPrefix = false;
 css.prefixes = require(191);
 css.properties = properties;
 
-css.colors = require(192);
-css.Styles = require(193);
+css.easing = require(192);
+css.colors = require(193);
+css.Styles = require(194);
 
-css.darken = require(194);
-css.fade = require(195);
-css.lighten = require(196);
+css.darken = require(195);
+css.fade = require(196);
+css.lighten = require(197);
 
 
 },
@@ -9618,7 +9636,7 @@ function(require, exports, module, undefined, global) {
 /* ../../node_modules/css/src/prefix.js */
 
 var prefixes = require(191),
-    capitalizeString = require(197);
+    capitalizeString = require(198);
 
 
 module.exports = prefix;
@@ -9893,7 +9911,7 @@ function(require, exports, module, undefined, global) {
 /* ../../node_modules/css/src/transition.js */
 
 var prefixes = require(191),
-    prefixArray = require(201);
+    prefixArray = require(205);
 
 
 module.exports = transition;
@@ -10187,10 +10205,56 @@ var environment = require(99);
 
 
 if (environment.browser) {
-    module.exports = require(198);
-} else {
     module.exports = require(199);
+} else {
+    module.exports = require(200);
 }
+
+
+},
+function(require, exports, module, undefined, global) {
+/* ../../node_modules/css/src/easing.js */
+
+var easing = exports;
+
+
+easing.linear = "linear";
+
+easing.inSine = "cubic-bezier(0.47, 0, 0.745, 0.715)";
+easing.outSine = "cubic-bezier(0.39, 0.575, 0.565, 1)";
+easing.inOutSine = "cubic-bezier(0.445, 0.05, 0.55, 0.95)";
+
+easing.inQuad = "cubic-bezier(0.55, 0.085, 0.68, 0.53)";
+easing.outQuad = "cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+easing.inOutQuad = "cubic-bezier(0.455, 0.03, 0.515, 0.955)";
+
+easing.inCubic = "cubic-bezier(0.55, 0.055, 0.675, 0.19)";
+easing.outCubic = "cubic-bezier(0.215, 0.61, 0.355, 1)";
+easing.inOutCubic = "cubic-bezier(0.645, 0.045, 0.355, 1)";
+
+easing.inQuart = "cubic-bezier(0.895, 0.03, 0.685, 0.22)";
+easing.outQuart = "cubic-bezier(0.165, 0.84, 0.44, 1)";
+easing.inOutQuart = "cubic-bezier(0.77, 0, 0.175, 1)";
+
+easing.inQuint = "cubic-bezier(0.755, 0.05, 0.855, 0.06)";
+easing.outQuint = "cubic-bezier(0.23, 1, 0.32, 1)";
+easing.inOutQuint = "cubic-bezier(0.86, 0, 0.07, 1)";
+
+easing.inExpo = "cubic-bezier(0.95, 0.05, 0.795, 0.035)";
+easing.outExpo = "cubic-bezier(0.19, 1, 0.22, 1)";
+easing.inOutExpo = "cubic-bezier(1, 0, 0, 1)";
+
+easing.inCirc = "cubic-bezier(0.6, 0.04, 0.98, 0.335)";
+easing.outCirc = "cubic-bezier(0.075, 0.82, 0.165, 1)";
+easing.inOutCirc = "cubic-bezier(0.785, 0.135, 0.15, 0.86)";
+
+easing.inBack = "cubic-bezier(0.6, -0.28, 0.735, 0.045)";
+easing.outBack = "cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+easing.inOutBack = "cubic-bezier(0.68, -0.55, 0.265, 1.55)";
+
+easing["in"] = "cubic-bezier(0.755, 0.05, 0.855, 0.06)";
+easing.out = "cubic-bezier(0.23, 1, 0.32, 1)";
+easing.inOut = "cubic-bezier(0.445, 0.05, 0.55, 0.95)";
 
 
 },
@@ -10491,9 +10555,9 @@ module.exports = {
 function(require, exports, module, undefined, global) {
 /* ../../node_modules/css/src/Styles.js */
 
-var forEach = require(108),
+var arrayForEach = require(111),
     indexOf = require(55),
-    capitalizeString = require(197),
+    capitalizeString = require(198),
     transition = require(187),
     textShadow = require(188),
     properties = require(186),
@@ -10514,7 +10578,7 @@ var css = require(184);
 function Styles() {}
 StylesPrototype = Styles.prototype;
 
-forEach(properties, function(key) {
+arrayForEach(properties, function(key) {
     if (indexOf(nonPrefixProperties, key) === -1) {
         StylesPrototype["set" + capitalizeString(key)] = function(value) {
             return prefix(this, key, value, null, css.stopPrefix);
@@ -10540,8 +10604,8 @@ StylesPrototype.setTextShadow = function() {
 function(require, exports, module, undefined, global) {
 /* ../../node_modules/css/src/manipulators/darken.js */
 
-var color = require(202),
-    toStyle = require(203);
+var color = require(206),
+    toStyle = require(207);
 
 
 var darken_color = color.create();
@@ -10566,8 +10630,8 @@ function darken(style, amount) {
 function(require, exports, module, undefined, global) {
 /* ../../node_modules/css/src/manipulators/fade.js */
 
-var color = require(202),
-    toStyle = require(203);
+var color = require(206),
+    toStyle = require(207);
 
 
 var fade_color = color.create();
@@ -10588,8 +10652,8 @@ function fade(style, amount) {
 function(require, exports, module, undefined, global) {
 /* ../../node_modules/css/src/manipulators/lighten.js */
 
-var color = require(202),
-    toStyle = require(203);
+var color = require(206),
+    toStyle = require(207);
 
 
 var lighten_color = color.create();
@@ -10612,7 +10676,7 @@ function lighten(style, amount) {
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/capitalize_string/src/index.js */
+/* ../../node_modules/css/node_modules/capitalize_string/src/index.js */
 
 module.exports = capitalizeString;
 
@@ -10627,13 +10691,13 @@ function(require, exports, module, undefined, global) {
 /* ../../node_modules/css/src/prefixes/browser.js */
 
 var environment = require(99),
-    createPrefix = require(200);
+    getCurrentStyle = require(201),
+    Prefix = require(202);
 
 
-var win = environment.window,
-    doc = environment.document,
+var document = environment.document,
 
-    styles = win.getComputedStyle(doc.documentElement, ""),
+    styles = getCurrentStyle(document.documentElement || document.body.parentNode),
 
     pre = (
         Array.prototype.slice.call(styles).join("").match(/-(moz|webkit|ms)-/) ||
@@ -10643,48 +10707,126 @@ var win = environment.window,
     dom = ("WebKit|Moz|MS|O").match(new RegExp("(" + pre + ")", "i"))[1];
 
 
-module.exports = [createPrefix(dom, pre)];
+module.exports = [new Prefix(dom, pre)];
 
 
 },
 function(require, exports, module, undefined, global) {
 /* ../../node_modules/css/src/prefixes/node.js */
 
-var forEach = require(108),
-    createPrefix = require(200);
+var Prefix = require(202);
 
 
-var prefixes = module.exports = [];
-
-
-forEach([
-    ["WebKit", "webkit"],
-    ["Moz", "moz"],
-    ["MS", "ms"],
-    ["O", "o"]
-], function(value) {
-    prefixes[prefixes.length] = createPrefix(value[0], value[1]);
-});
+module.exports = [
+    new Prefix("WebKit", "webkit"),
+    new Prefix("Moz", "moz"),
+    new Prefix("MS", "ms"),
+    new Prefix("O", "o")
+];
 
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/css/src/prefixes/createPrefix.js */
+/* ../../node_modules/css/node_modules/get_current_style/src/index.js */
 
-var capitalizeString = require(197);
+var supports = require(135),
+    environment = require(99),
+    isElement = require(171),
+    isString = require(19),
+    camelize = require(203);
 
 
-module.exports = createPrefix;
+var baseGetCurrentStyles;
 
 
-function createPrefix(dom, pre) {
-    return {
-        dom: dom,
-        lowercase: pre,
-        css: "-" + pre + "-",
-        js: capitalizeString(pre)
+module.exports = getCurrentStyle;
+
+
+function getCurrentStyle(node, style) {
+    if (isElement(node)) {
+        if (isString(style)) {
+            return baseGetCurrentStyles(node)[camelize(style)] || "";
+        } else {
+            return baseGetCurrentStyles(node);
+        }
+    } else {
+        if (isString(style)) {
+            return "";
+        } else {
+            return null;
+        }
+    }
+}
+
+if (supports.dom && environment.document.defaultView) {
+    baseGetCurrentStyles = function(node) {
+        return node.ownerDocument.defaultView.getComputedStyle(node, "");
+    };
+} else {
+    baseGetCurrentStyles = function(node) {
+        if (node.currentStyle) {
+            return node.currentStyle;
+        } else {
+            return node.style;
+        }
     };
 }
+
+
+},
+function(require, exports, module, undefined, global) {
+/* ../../node_modules/css/src/prefixes/Prefix.js */
+
+var capitalizeString = require(198);
+
+
+module.exports = Prefix;
+
+
+function Prefix(dom, pre) {
+    this.dom = dom;
+    this.lowercase = pre;
+    this.css = "-" + pre + "-";
+    this.js = capitalizeString(pre);
+}
+
+
+},
+function(require, exports, module, undefined, global) {
+/* ../../node_modules/css/node_modules/camelize/src/index.js */
+
+var reInflect = require(204),
+    capitalizeString = require(198);
+
+
+module.exports = camelize;
+
+
+function camelize(string, lowFirstLetter) {
+    var parts, part, i, il;
+
+    lowFirstLetter = lowFirstLetter !== false;
+    parts = string.match(reInflect);
+    i = lowFirstLetter ? 0 : -1;
+    il = parts.length - 1;
+
+    while (i++ < il) {
+        parts[i] = capitalizeString(parts[i]);
+    }
+
+    if (lowFirstLetter && (part = parts[0])) {
+        parts[0] = part.charAt(0).toLowerCase() + part.slice(1);
+    }
+
+    return parts.join("");
+}
+
+
+},
+function(require, exports, module, undefined, global) {
+/* ../../node_modules/css/node_modules/re_inflect/src/index.js */
+
+module.exports = /[^A-Z-_ ]+|[A-Z][^A-Z-_ ]+|[^a-z-_ ]+/g;
 
 
 },
@@ -10710,14 +10852,12 @@ function prefixArray(prefix, array) {
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/color/src/index.js */
+/* ../../node_modules/css/node_modules/color/src/index.js */
 
-var mathf = require(204),
-    vec3 = require(205),
-    vec4 = require(206),
-    isNumber = require(22),
-    isString = require(19),
-    colorNames = require(207);
+var mathf = require(208),
+    vec3 = require(209),
+    vec4 = require(210),
+    isNumber = require(22);
 
 
 var color = exports;
@@ -10729,10 +10869,10 @@ color.ArrayType = typeof(Float32Array) !== "undefined" ? Float32Array : mathf.Ar
 color.create = function(r, g, b, a) {
     var out = new color.ArrayType(4);
 
-    out[0] = isNumber(r) ? r : 0;
-    out[1] = isNumber(g) ? g : 0;
-    out[2] = isNumber(b) ? b : 0;
-    out[3] = isNumber(a) ? a : 1;
+    out[0] = r !== undefined ? r : 0;
+    out[1] = g !== undefined ? g : 0;
+    out[2] = b !== undefined ? b : 0;
+    out[3] = a !== undefined ? a : 1;
 
     return out;
 };
@@ -10805,17 +10945,17 @@ color.str = function(out) {
     return "Color(" + out[0] + ", " + out[1] + ", " + out[2] + ", " + out[3] + ")";
 };
 
-color.string = color.toString = color.str;
-
 color.set = function(out, r, g, b, a) {
-    if (isNumber(r)) {
-        out[0] = isNumber(r) ? r : 0;
-        out[1] = isNumber(g) ? g : 0;
-        out[2] = isNumber(b) ? b : 0;
-        out[3] = isNumber(a) ? a : 1;
-    } else if (isString(r)) {
+    var type = typeof(r);
+
+    if (type === "number") {
+        out[0] = r !== undefined ? r : 0;
+        out[1] = g !== undefined ? g : 0;
+        out[2] = b !== undefined ? b : 0;
+        out[3] = a !== undefined ? a : 1;
+    } else if (type === "string") {
         color.fromStyle(out, r);
-    } else if (r && r.length === +r.length) {
+    } else if (r.length === +r.length) {
         out[0] = r[0] || 0;
         out[1] = r[1] || 0;
         out[2] = r[2] || 0;
@@ -10859,7 +10999,6 @@ color.toHEX = function(out) {
 
 var rgb255 = /^rgb\((\d+),(?:\s+)?(\d+),(?:\s+)?(\d+)\)$/i,
     inv255 = 1 / 255;
-
 color.fromRGB = function(out, style) {
     var values = rgb255.exec(style);
     out[0] = mathf.min(255, Number(values[1])) * inv255;
@@ -10870,7 +11009,6 @@ color.fromRGB = function(out, style) {
 };
 
 var rgba255 = /^rgba\((\d+),(?:\s+)?(\d+),(?:\s+)?(\d+),(?:\s+)?((?:\.)?\d+(?:\.\d+)?)\)$/i;
-
 color.fromRGBA = function(out, style) {
     var values = rgba255.exec(style);
     out[0] = mathf.min(255, Number(values[1])) * inv255;
@@ -10882,7 +11020,6 @@ color.fromRGBA = function(out, style) {
 
 var rgb100 = /^rgb\((\d+)\%,(?:\s+)?(\d+)\%,(?:\s+)?(\d+)\%\)$/i,
     inv100 = 1 / 100;
-
 color.fromRGB100 = function(out, style) {
     var values = rgb100.exec(style);
     out[0] = mathf.min(100, Number(values[1])) * inv100;
@@ -10902,7 +11039,6 @@ color.fromHEX = function(out, style) {
 
 var hex3to6 = /#(.)(.)(.)/,
     hex3to6String = "#$1$1$2$2$3$3";
-
 color.fromHEX3 = function(out, style) {
     style = style.replace(hex3to6, hex3to6String);
     out[0] = parseInt(style.substr(1, 2), 16) * inv255;
@@ -10919,7 +11055,6 @@ color.fromColorName = function(out, style) {
 var hex6 = /^\#([0.0-9a-f]{6})$/i,
     hex3 = /^\#([0.0-9a-f])([0.0-9a-f])([0.0-9a-f])$/i,
     colorName = /^(\w+)$/i;
-
 color.fromStyle = function(out, style) {
     if (rgb255.test(style)) {
         return color.fromRGB(out, style);
@@ -10938,14 +11073,156 @@ color.fromStyle = function(out, style) {
     }
 };
 
-color.colorNames = colorNames;
+var colorNames = color.colorNames = {
+    aliceblue: "#f0f8ff",
+    antiquewhite: "#faebd7",
+    aqua: "#00ffff",
+    aquamarine: "#7fffd4",
+    azure: "#f0ffff",
+    beige: "#f5f5dc",
+    bisque: "#ffe4c4",
+    black: "#000000",
+    blanchedalmond: "#ffebcd",
+    blue: "#0000ff",
+    blueviolet: "#8a2be2",
+    brown: "#a52a2a",
+    burlywood: "#deb887",
+    cadetblue: "#5f9ea0",
+    chartreuse: "#7fff00",
+    chocolate: "#d2691e",
+    coral: "#ff7f50",
+    cornflowerblue: "#6495ed",
+    cornsilk: "#fff8dc",
+    crimson: "#dc143c",
+    cyan: "#00ffff",
+    darkblue: "#00008b",
+    darkcyan: "#008b8b",
+    darkgoldenrod: "#b8860b",
+    darkgray: "#a9a9a9",
+    darkgreen: "#006400",
+    darkkhaki: "#bdb76b",
+    darkmagenta: "#8b008b",
+    darkolivegreen: "#556b2f",
+    darkorange: "#ff8c00",
+    darkorchid: "#9932cc",
+    darkred: "#8b0000",
+    darksalmon: "#e9967a",
+    darkseagreen: "#8fbc8f",
+    darkslateblue: "#483d8b",
+    darkslategray: "#2f4f4f",
+    darkturquoise: "#00ced1",
+    darkviolet: "#9400d3",
+    deeppink: "#ff1493",
+    deepskyblue: "#00bfff",
+    dimgray: "#696969",
+    dodgerblue: "#1e90ff",
+    firebrick: "#b22222",
+    floralwhite: "#fffaf0",
+    forestgreen: "#228b22",
+    fuchsia: "#ff00ff",
+    gainsboro: "#dcdcdc",
+    ghostwhite: "#f8f8ff",
+    gold: "#ffd700",
+    goldenrod: "#daa520",
+    gray: "#808080",
+    green: "#008000",
+    greenyellow: "#adff2f",
+    grey: "#808080",
+    honeydew: "#f0fff0",
+    hotpink: "#ff69b4",
+    indianred: "#cd5c5c",
+    indigo: "#4b0082",
+    ivory: "#fffff0",
+    khaki: "#f0e68c",
+    lavender: "#e6e6fa",
+    lavenderblush: "#fff0f5",
+    lawngreen: "#7cfc00",
+    lemonchiffon: "#fffacd",
+    lightblue: "#add8e6",
+    lightcoral: "#f08080",
+    lightcyan: "#e0ffff",
+    lightgoldenrodyellow: "#fafad2",
+    lightgrey: "#d3d3d3",
+    lightgreen: "#90ee90",
+    lightpink: "#ffb6c1",
+    lightsalmon: "#ffa07a",
+    lightseagreen: "#20b2aa",
+    lightskyblue: "#87cefa",
+    lightslategray: "#778899",
+    lightsteelblue: "#b0c4de",
+    lightyellow: "#ffffe0",
+    lime: "#00ff00",
+    limegreen: "#32cd32",
+    linen: "#faf0e6",
+    magenta: "#ff00ff",
+    maroon: "#800000",
+    mediumaquamarine: "#66cdaa",
+    mediumblue: "#0000cd",
+    mediumorchid: "#ba55d3",
+    mediumpurple: "#9370d8",
+    mediumseagreen: "#3cb371",
+    mediumslateblue: "#7b68ee",
+    mediumspringgreen: "#00fa9a",
+    mediumturquoise: "#48d1cc",
+    mediumvioletred: "#c71585",
+    midnightblue: "#191970",
+    mintcream: "#f5fffa",
+    mistyrose: "#ffe4e1",
+    moccasin: "#ffe4b5",
+    navajowhite: "#ffdead",
+    navy: "#000080",
+    oldlace: "#fdf5e6",
+    olive: "#808000",
+    olivedrab: "#6b8e23",
+    orange: "#ffa500",
+    orangered: "#ff4500",
+    orchid: "#da70d6",
+    palegoldenrod: "#eee8aa",
+    palegreen: "#98fb98",
+    paleturquoise: "#afeeee",
+    palevioletred: "#d87093",
+    papayawhip: "#ffefd5",
+    peachpuff: "#ffdab9",
+    peru: "#cd853f",
+    pink: "#ffc0cb",
+    plum: "#dda0dd",
+    powderblue: "#b0e0e6",
+    purple: "#800080",
+    red: "#ff0000",
+    rosybrown: "#bc8f8f",
+    royalblue: "#4169e1",
+    saddlebrown: "#8b4513",
+    salmon: "#fa8072",
+    sandybrown: "#f4a460",
+    seagreen: "#2e8b57",
+    seashell: "#fff5ee",
+    sienna: "#a0522d",
+    silver: "#c0c0c0",
+    skyblue: "#87ceeb",
+    slateblue: "#6a5acd",
+    slategray: "#708090",
+    snow: "#fffafa",
+    springgreen: "#00ff7f",
+    steelblue: "#4682b4",
+    tan: "#d2b48c",
+    teal: "#008080",
+    thistle: "#d8bfd8",
+    tomato: "#ff6347",
+    turquoise: "#40e0d0",
+    violet: "#ee82ee",
+    wheat: "#f5deb3",
+    white: "#ffffff",
+    whitesmoke: "#f5f5f5",
+    yellow: "#ffff00",
+    yellowgreen: "#9acd32"
+};
 
 
 },
 function(require, exports, module, undefined, global) {
 /* ../../node_modules/css/src/manipulators/toStyle.js */
 
-var color = require(202);
+var color = require(206);
 
 
 module.exports = toStyle;
@@ -10962,19 +11239,17 @@ function toStyle(value) {
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/mathf/src/index.js */
+/* ../../node_modules/css/node_modules/color/node_modules/mathf/src/index.js */
 
 var keys = require(35),
-    clamp = require(183),
-    isNaNPolyfill = require(208);
+    isNaN = require(211);
 
 
 var mathf = exports,
 
-    NativeMath = global.Math,
+    NativeMath = Math,
 
-    hasFloat32Array = typeof(Float32Array) !== "undefined",
-    NativeFloat32Array = hasFloat32Array ? Float32Array : Array;
+    NativeFloat32Array = typeof(Float32Array) !== "undefined" ? Float32Array : Array;
 
 
 mathf.ArrayType = NativeFloat32Array;
@@ -11001,57 +11276,52 @@ mathf.SQRT2 = NativeMath.SQRT2;
 mathf.abs = NativeMath.abs;
 
 mathf.acos = NativeMath.acos;
-mathf.acosh = NativeMath.acosh || function acosh(x) {
+mathf.acosh = NativeMath.acosh || (NativeMath.acosh = function acosh(x) {
     return mathf.log(x + mathf.sqrt(x * x - 1));
-};
+});
 mathf.asin = NativeMath.asin;
-mathf.asinh = NativeMath.asinh || function asinh(x) {
+mathf.asinh = NativeMath.asinh || (NativeMath.asinh = function asinh(x) {
     if (x === -Infinity) {
         return x;
     } else {
         return mathf.log(x + mathf.sqrt(x * x + 1));
     }
-};
+});
 mathf.atan = NativeMath.atan;
 mathf.atan2 = NativeMath.atan2;
-mathf.atanh = NativeMath.atanh || function atanh(x) {
+mathf.atanh = NativeMath.atanh || (NativeMath.atanh = function atanh(x) {
     return mathf.log((1 + x) / (1 - x)) / 2;
-};
+});
 
-mathf.cbrt = NativeMath.cbrt || function cbrt(x) {
+mathf.cbrt = NativeMath.cbrt || (NativeMath.cbrt = function cbrt(x) {
     var y = mathf.pow(mathf.abs(x), 1 / 3);
     return x < 0 ? -y : y;
-};
+});
 
 mathf.ceil = NativeMath.ceil;
 
-mathf.clz32 = NativeMath.clz32 || function clz32(value) {
+mathf.clz32 = NativeMath.clz32 || (NativeMath.clz32 = function clz32(value) {
     value = +value >>> 0;
     return value ? 32 - value.toString(2).length : 32;
-};
+});
 
 mathf.cos = NativeMath.cos;
-mathf.cosh = NativeMath.cosh || function cosh(x) {
+mathf.cosh = NativeMath.cosh || (NativeMath.cosh = function cosh(x) {
     return (mathf.exp(x) + mathf.exp(-x)) / 2;
-};
+});
 
 mathf.exp = NativeMath.exp;
 
-mathf.expm1 = NativeMath.expm1 || function expm1(x) {
+mathf.expm1 = NativeMath.expm1 || (NativeMath.expm1 = function expm1(x) {
     return mathf.exp(x) - 1;
-};
+});
 
 mathf.floor = NativeMath.floor;
-mathf.fround = NativeMath.fround || (hasFloat32Array ?
-    function fround(x) {
-        return new NativeFloat32Array([x])[0];
-    } :
-    function fround(x) {
-        return x;
-    }
-);
+mathf.fround = NativeMath.fround || (NativeMath.fround = function fround(x) {
+    return new NativeFloat32Array([x])[0];
+});
 
-mathf.hypot = NativeMath.hypot || function hypot() {
+mathf.hypot = NativeMath.hypot || (NativeMath.hypot = function hypot() {
     var y = 0,
         i = -1,
         il = arguments.length - 1,
@@ -11068,30 +11338,30 @@ mathf.hypot = NativeMath.hypot || function hypot() {
     }
 
     return mathf.sqrt(y);
-};
+});
 
-mathf.imul = NativeMath.imul || function imul(a, b) {
+mathf.imul = NativeMath.imul || (NativeMath.imul = function imul(a, b) {
     var ah = (a >>> 16) & 0xffff,
         al = a & 0xffff,
         bh = (b >>> 16) & 0xffff,
         bl = b & 0xffff;
 
     return ((al * bl) + (((ah * bl + al * bh) << 16) >>> 0) | 0);
-};
+});
 
 mathf.log = NativeMath.log;
 
-mathf.log1p = NativeMath.log1p || function log1p(x) {
+mathf.log1p = NativeMath.log1p || (NativeMath.log1p = function log1p(x) {
     return mathf.log(1 + x);
-};
+});
 
-mathf.log10 = NativeMath.log10 || function log10(x) {
+mathf.log10 = NativeMath.log10 || (NativeMath.log10 = function log10(x) {
     return mathf.log(x) / mathf.LN10;
-};
+});
 
-mathf.log2 = NativeMath.log2 || function log2(x) {
+mathf.log2 = NativeMath.log2 || (NativeMath.log2 = function log2(x) {
     return mathf.log(x) / mathf.LN2;
-};
+});
 
 mathf.max = NativeMath.max;
 mathf.min = NativeMath.min;
@@ -11101,24 +11371,23 @@ mathf.pow = NativeMath.pow;
 mathf.random = NativeMath.random;
 mathf.round = NativeMath.round;
 
-mathf.sign = NativeMath.sign || function sign(x) {
+mathf.sign = NativeMath.sign || (NativeMath.sign = function sign(x) {
     x = +x;
-    if (x === 0 || isNaNPolyfill(x)) {
+    if (x === 0 || isNaN(x)) {
         return x;
     } else {
         return x > 0 ? 1 : -1;
     }
-};
+});
 
 mathf.sin = NativeMath.sin;
-mathf.sinh = NativeMath.sinh || function sinh(x) {
+mathf.sinh = NativeMath.sinh || (NativeMath.sinh = function sinh(x) {
     return (mathf.exp(x) - mathf.exp(-x)) / 2;
-};
-
+});
 mathf.sqrt = NativeMath.sqrt;
 
 mathf.tan = NativeMath.tan;
-mathf.tanh = NativeMath.tanh || function tanh(x) {
+mathf.tanh = NativeMath.tanh || (NativeMath.tanh = function tanh(x) {
     if (x === Infinity) {
         return 1;
     } else if (x === -Infinity) {
@@ -11126,18 +11395,19 @@ mathf.tanh = NativeMath.tanh || function tanh(x) {
     } else {
         return (mathf.exp(x) - mathf.exp(-x)) / (mathf.exp(x) + mathf.exp(-x));
     }
-};
+});
 
-mathf.trunc = NativeMath.trunc || function trunc(x) {
+mathf.trunc = NativeMath.trunc || (NativeMath.trunc = function trunc(x) {
     return x < 0 ? mathf.ceil(x) : mathf.floor(x);
-};
+});
 
 mathf.equals = function(a, b, e) {
-    return mathf.abs(a - b) < (e !== void(0) ? e : mathf.EPSILON);
+    return mathf.abs(a - b) < (e !== void 0 ? e : mathf.EPSILON);
 };
 
 mathf.modulo = function(a, b) {
     var r = a % b;
+
     return (r * b < 0) ? r + b : r;
 };
 
@@ -11154,7 +11424,9 @@ mathf.snap = function(x, y) {
     return m < (y * 0.5) ? x - m : x + y - m;
 };
 
-mathf.clamp = clamp;
+mathf.clamp = function(x, min, max) {
+    return x < min ? min : x > max ? max : x;
+};
 
 mathf.clampBottom = function(x, min) {
     return x < min ? min : x;
@@ -11165,13 +11437,7 @@ mathf.clampTop = function(x, max) {
 };
 
 mathf.clamp01 = function(x) {
-    if (x < 0) {
-        return 0;
-    } else if (x > 1) {
-        return 1;
-    } else {
-        return x;
-    }
+    return x < 0 ? 0 : x > 1 ? 1 : x;
 };
 
 mathf.truncate = function(x, n) {
@@ -11373,10 +11639,9 @@ mathf.direction = function(x, y) {
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/vec3/src/index.js */
+/* ../../node_modules/css/node_modules/color/node_modules/vec3/src/index.js */
 
-var mathf = require(204),
-    isNumber = require(22);
+var mathf = require(208);
 
 
 var vec3 = exports;
@@ -11388,9 +11653,9 @@ vec3.ArrayType = typeof(Float32Array) !== "undefined" ? Float32Array : mathf.Arr
 vec3.create = function(x, y, z) {
     var out = new vec3.ArrayType(3);
 
-    out[0] = isNumber(x) ? x : 0;
-    out[1] = isNumber(y) ? y : 0;
-    out[2] = isNumber(z) ? z : 0;
+    out[0] = x !== undefined ? x : 0;
+    out[1] = y !== undefined ? y : 0;
+    out[2] = z !== undefined ? z : 0;
 
     return out;
 };
@@ -11416,9 +11681,9 @@ vec3.clone = function(a) {
 
 vec3.set = function(out, x, y, z) {
 
-    out[0] = isNumber(x) ? x : 0;
-    out[1] = isNumber(y) ? y : 0;
-    out[2] = isNumber(z) ? z : 0;
+    out[0] = x !== undefined ? x : 0;
+    out[1] = y !== undefined ? y : 0;
+    out[2] = z !== undefined ? z : 0;
 
     return out;
 };
@@ -11697,21 +11962,6 @@ vec3.transformProjection = function(out, a, m) {
     return out;
 };
 
-vec3.transformProjectionNoPosition = function(out, a, m) {
-    var x = a[0],
-        y = a[1],
-        z = a[2],
-        d = x * m[3] + y * m[7] + z * m[11] + m[15];
-
-    d = d !== 0 ? 1 / d : d;
-
-    out[0] = (x * m[0] + y * m[4] + z * m[8]) * d;
-    out[1] = (x * m[1] + y * m[5] + z * m[9]) * d;
-    out[2] = (x * m[2] + y * m[6] + z * m[10]) * d;
-
-    return out;
-};
-
 vec3.transformQuat = function(out, a, q) {
     var x = a[0],
         y = a[1],
@@ -11777,18 +12027,16 @@ vec3.notEqual = function(a, b) {
 };
 
 vec3.str = function(out) {
+
     return "Vec3(" + out[0] + ", " + out[1] + ", " + out[2] + ")";
 };
-
-vec3.string = vec3.toString = vec3.str;
 
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/vec4/src/index.js */
+/* ../../node_modules/css/node_modules/color/node_modules/vec4/src/index.js */
 
-var mathf = require(204),
-    isNumber = require(22);
+var mathf = require(208);
 
 
 var vec4 = exports;
@@ -11800,10 +12048,10 @@ vec4.ArrayType = typeof(Float32Array) !== "undefined" ? Float32Array : mathf.Arr
 vec4.create = function(x, y, z, w) {
     var out = new vec4.ArrayType(4);
 
-    out[0] = isNumber(x) ? x : 0;
-    out[1] = isNumber(y) ? y : 0;
-    out[2] = isNumber(z) ? z : 0;
-    out[3] = isNumber(w) ? w : 1;
+    out[0] = x !== undefined ? x : 0;
+    out[1] = y !== undefined ? y : 0;
+    out[2] = z !== undefined ? z : 0;
+    out[3] = w !== undefined ? w : 1;
 
     return out;
 };
@@ -11831,10 +12079,10 @@ vec4.clone = function(a) {
 
 vec4.set = function(out, x, y, z, w) {
 
-    out[0] = isNumber(x) ? x : 0;
-    out[1] = isNumber(y) ? y : 0;
-    out[2] = isNumber(z) ? z : 0;
-    out[3] = isNumber(w) ? w : 1;
+    out[0] = x !== undefined ? x : 0;
+    out[1] = y !== undefined ? y : 0;
+    out[2] = z !== undefined ? z : 0;
+    out[3] = w !== undefined ? w : 0;
 
     return out;
 };
@@ -12142,170 +12390,20 @@ vec4.notEqual = function(a, b) {
 };
 
 vec4.str = function(out) {
+
     return "Vec4(" + out[0] + ", " + out[1] + ", " + out[2] + ", " + out[3] + ")";
 };
 
-vec4.string = vec4.toString = vec4.str;
-
 
 },
 function(require, exports, module, undefined, global) {
-/* ../../node_modules/color/src/colorNames.js */
-
-module.exports = {
-    aliceblue: "#f0f8ff",
-    antiquewhite: "#faebd7",
-    aqua: "#00ffff",
-    aquamarine: "#7fffd4",
-    azure: "#f0ffff",
-    beige: "#f5f5dc",
-    bisque: "#ffe4c4",
-    black: "#000000",
-    blanchedalmond: "#ffebcd",
-    blue: "#0000ff",
-    blueviolet: "#8a2be2",
-    brown: "#a52a2a",
-    burlywood: "#deb887",
-    cadetblue: "#5f9ea0",
-    chartreuse: "#7fff00",
-    chocolate: "#d2691e",
-    coral: "#ff7f50",
-    cornflowerblue: "#6495ed",
-    cornsilk: "#fff8dc",
-    crimson: "#dc143c",
-    cyan: "#00ffff",
-    darkblue: "#00008b",
-    darkcyan: "#008b8b",
-    darkgoldenrod: "#b8860b",
-    darkgray: "#a9a9a9",
-    darkgreen: "#006400",
-    darkkhaki: "#bdb76b",
-    darkmagenta: "#8b008b",
-    darkolivegreen: "#556b2f",
-    darkorange: "#ff8c00",
-    darkorchid: "#9932cc",
-    darkred: "#8b0000",
-    darksalmon: "#e9967a",
-    darkseagreen: "#8fbc8f",
-    darkslateblue: "#483d8b",
-    darkslategray: "#2f4f4f",
-    darkturquoise: "#00ced1",
-    darkviolet: "#9400d3",
-    deeppink: "#ff1493",
-    deepskyblue: "#00bfff",
-    dimgray: "#696969",
-    dodgerblue: "#1e90ff",
-    firebrick: "#b22222",
-    floralwhite: "#fffaf0",
-    forestgreen: "#228b22",
-    fuchsia: "#ff00ff",
-    gainsboro: "#dcdcdc",
-    ghostwhite: "#f8f8ff",
-    gold: "#ffd700",
-    goldenrod: "#daa520",
-    gray: "#808080",
-    green: "#008000",
-    greenyellow: "#adff2f",
-    grey: "#808080",
-    honeydew: "#f0fff0",
-    hotpink: "#ff69b4",
-    indianred: "#cd5c5c",
-    indigo: "#4b0082",
-    ivory: "#fffff0",
-    khaki: "#f0e68c",
-    lavender: "#e6e6fa",
-    lavenderblush: "#fff0f5",
-    lawngreen: "#7cfc00",
-    lemonchiffon: "#fffacd",
-    lightblue: "#add8e6",
-    lightcoral: "#f08080",
-    lightcyan: "#e0ffff",
-    lightgoldenrodyellow: "#fafad2",
-    lightgrey: "#d3d3d3",
-    lightgreen: "#90ee90",
-    lightpink: "#ffb6c1",
-    lightsalmon: "#ffa07a",
-    lightseagreen: "#20b2aa",
-    lightskyblue: "#87cefa",
-    lightslategray: "#778899",
-    lightsteelblue: "#b0c4de",
-    lightyellow: "#ffffe0",
-    lime: "#00ff00",
-    limegreen: "#32cd32",
-    linen: "#faf0e6",
-    magenta: "#ff00ff",
-    maroon: "#800000",
-    mediumaquamarine: "#66cdaa",
-    mediumblue: "#0000cd",
-    mediumorchid: "#ba55d3",
-    mediumpurple: "#9370d8",
-    mediumseagreen: "#3cb371",
-    mediumslateblue: "#7b68ee",
-    mediumspringgreen: "#00fa9a",
-    mediumturquoise: "#48d1cc",
-    mediumvioletred: "#c71585",
-    midnightblue: "#191970",
-    mintcream: "#f5fffa",
-    mistyrose: "#ffe4e1",
-    moccasin: "#ffe4b5",
-    navajowhite: "#ffdead",
-    navy: "#000080",
-    oldlace: "#fdf5e6",
-    olive: "#808000",
-    olivedrab: "#6b8e23",
-    orange: "#ffa500",
-    orangered: "#ff4500",
-    orchid: "#da70d6",
-    palegoldenrod: "#eee8aa",
-    palegreen: "#98fb98",
-    paleturquoise: "#afeeee",
-    palevioletred: "#d87093",
-    papayawhip: "#ffefd5",
-    peachpuff: "#ffdab9",
-    peru: "#cd853f",
-    pink: "#ffc0cb",
-    plum: "#dda0dd",
-    powderblue: "#b0e0e6",
-    purple: "#800080",
-    red: "#ff0000",
-    rosybrown: "#bc8f8f",
-    royalblue: "#4169e1",
-    saddlebrown: "#8b4513",
-    salmon: "#fa8072",
-    sandybrown: "#f4a460",
-    seagreen: "#2e8b57",
-    seashell: "#fff5ee",
-    sienna: "#a0522d",
-    silver: "#c0c0c0",
-    skyblue: "#87ceeb",
-    slateblue: "#6a5acd",
-    slategray: "#708090",
-    snow: "#fffafa",
-    springgreen: "#00ff7f",
-    steelblue: "#4682b4",
-    tan: "#d2b48c",
-    teal: "#008080",
-    thistle: "#d8bfd8",
-    tomato: "#ff6347",
-    turquoise: "#40e0d0",
-    violet: "#ee82ee",
-    wheat: "#f5deb3",
-    white: "#ffffff",
-    whitesmoke: "#f5f5f5",
-    yellow: "#ffff00",
-    yellowgreen: "#9acd32"
-};
-
-
-},
-function(require, exports, module, undefined, global) {
-/* ../../node_modules/is_nan/src/index.js */
+/* ../../node_modules/css/node_modules/color/node_modules/mathf/node_modules/is_nan/src/index.js */
 
 var isNumber = require(22);
 
 
-module.exports = Number.isNaN || function isNaN(value) {
-    return isNumber(value) && value !== value;
+module.exports = Number.isNaN || function isNaN(obj) {
+    return isNumber(obj) && obj !== obj;
 };
 
 
