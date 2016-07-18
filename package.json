@@ -18,16 +18,16 @@
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
-    "comn": "git://github.com/nathanfaucett/comn.git",
-    "virt-dom": "git://github.com/nathanfaucett/virt-dom.git",
+    "@nathanfaucett/comn": "^0.0.1",
+    "@nathanfaucett/virt-dom": "^0.0.1",
     "grunt": "^0.4.5",
     "grunt-contrib-jshint": "^0.11.3",
     "grunt-jsbeautifier": "^0.2.10"
   },
   "dependencies": {
-    "css": "git://github.com/nathanfaucett/css.git",
-    "extend": "git://github.com/nathanfaucett/extend.git",
-    "prop_types": "git://github.com/nathanfaucett/prop_types.git",
-    "virt": "git://github.com/nathanfaucett/virt.git"
+    "@nathanfaucett/css": "^0.0.1",
+    "@nathanfaucett/extend": "^0.0.1",
+    "@nathanfaucett/prop_types": "^0.0.1",
+    "@nathanfaucett/virt": "^0.0.1"
   }
 }
