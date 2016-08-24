@@ -7,10 +7,10 @@
     "url": "https://github.com/bakasho-libs/virt-ui-overlay.git"
   },
   "scripts": {
-    "example": "comn -f ./example/src/index.js -o ./example/index.js"
+    "example": "comn -f ./example/src/index.js -o ./example/index.js -m"
   },
   "main": "src/index.js",
-  "author": "Bakasho Team",
+  "author": "Faucette Team",
   "license": "MIT",
   "keywords": [
     "virt-ui-overlay",
@@ -18,8 +18,8 @@
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
-    "@nathanfaucett/comn": "^0.0.1",
-    "@nathanfaucett/virt-dom": "^0.0.1",
+    "@nathanfaucett/comn": "^0.0.11",
+    "@nathanfaucett/virt-dom": "^0.0.3",
     "grunt": "^0.4.5",
     "grunt-contrib-jshint": "^0.11.3",
     "grunt-jsbeautifier": "^0.2.10"
@@ -28,6 +28,6 @@
     "@nathanfaucett/css": "^0.0.1",
     "@nathanfaucett/extend": "^0.0.1",
     "@nathanfaucett/prop_types": "^0.0.1",
-    "@nathanfaucett/virt": "^0.0.1"
+    "@nathanfaucett/virt": "^0.0.2"
   }
 }

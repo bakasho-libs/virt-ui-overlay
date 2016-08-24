@@ -27,7 +27,7 @@ virt.Component.extend(App, "App");
 AppPrototype = App.prototype;
 
 App.childContextTypes = {
-    muiTheme: propTypes.object.isRequired,
+    theme: propTypes.object.isRequired,
     size: propTypes.object.isRequired
 };
 
@@ -59,7 +59,7 @@ AppPrototype.componentWillUnmount = function() {
 AppPrototype.getChildContext = function() {
     return {
         size: this.state.size,
-        muiTheme: {
+        theme: {
             palette: {
                 backgroundColor: "#000"
             }
