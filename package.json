@@ -19,7 +19,7 @@
   "readmeFilename": "README.md",
   "devDependencies": {
     "@nathanfaucett/comn": "^0.0.11",
-    "@nathanfaucett/virt-dom": "^0.0.12",
+    "@nathanfaucett/virt-dom": "^0.0.13",
     "grunt": "^0.4.5",
     "grunt-contrib-jshint": "^0.11.3",
     "grunt-jsbeautifier": "^0.2.10"
@@ -28,6 +28,6 @@
     "@nathanfaucett/css": "^0.0.2",
     "@nathanfaucett/extend": "^0.0.2",
     "@nathanfaucett/prop_types": "^0.0.1",
-    "@nathanfaucett/virt": "^0.0.10"
+    "@nathanfaucett/virt": "^0.0.11"
   }
 }
