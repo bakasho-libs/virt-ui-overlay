@@ -25,7 +25,7 @@
     "grunt-jsbeautifier": "^0.2.10"
   },
   "dependencies": {
-    "@nathanfaucett/color": "^0.0.4",
+    "@nathanfaucett/css": "^0.0.4",
     "@nathanfaucett/extend": "^0.0.2",
     "@nathanfaucett/prop_types": "^0.0.2",
     "@nathanfaucett/virt": "^0.0.13"
